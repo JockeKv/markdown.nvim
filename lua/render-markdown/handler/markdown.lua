@@ -50,13 +50,42 @@ M.render = function(namespace, root)
                 virt_text = { virt_text },
                 virt_text_pos = 'overlay',
             })
-        elseif capture == 'quote_marker' then
-            local virt_text = { value:gsub('>', state.config.quote), highlights.quote }
+        elseif capture == 'task_marker_unchecked' then
+            -- List markers from tree-sitter should have leading spaces removed, however there are known
+            -- edge cases in the parser: https://github.com/tree-sitter-grammars/tree-sitter-markdown/issues/127
+            -- As a result we handle leading spaces here, can remove if this gets fixed upstream
+            local bullet = ""
+
+            local virt_text = { ' ' .. bullet .. ' ' , highlights.bullet }
             vim.api.nvim_buf_set_extmark(0, namespace, start_row, start_col, {
                 end_row = end_row,
                 end_col = end_col,
                 virt_text = { virt_text },
                 virt_text_pos = 'overlay',
+            })
+        elseif capture == 'task_marker_checked' then
+            -- List markers from tree-sitter should have leading spaces removed, however there are known
+            -- edge cases in the parser: https://github.com/tree-sitter-grammars/tree-sitter-markdown/issues/127
+            -- As a result we handle leading spaces here, can remove if this gets fixed upstream
+            local bullet = ""
+
+            local virt_text = { ' ' .. bullet .. ' ' , highlights.bullet }
+            vim.api.nvim_buf_set_extmark(0, namespace, start_row, start_col, {
+                end_row = end_row,
+                end_col = end_col,
+                virt_text = { virt_text },
+                virt_text_pos = 'overlay',
+            })
+        elseif capture == 'quote_marker' then
+            local background = 'MsgSeparator'
+            local virt_text = { value:gsub('>', state.config.quote), {highlights.quote, background} }
+            vim.api.nvim_buf_set_extmark(0, namespace, start_row, 0, {
+                end_row = end_row + 1,
+                end_col = 0,
+                hl_group = background,
+                virt_text = { virt_text },
+                virt_text_pos = 'overlay',
+                hl_eol = true,
             })
         elseif capture == 'table' then
             if state.config.fat_tables then
